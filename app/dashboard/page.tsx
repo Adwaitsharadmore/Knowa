@@ -1,188 +1,180 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { FileText, MessageSquare, Users, TrendingUp, Slack, CheckCircle, AlertCircle, Upload, Bot } from "lucide-react"
-import Link from "next/link"
+"use client";
 
-export default function DashboardPage() {
+import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { Upload, Tag, ChevronDown, X } from "lucide-react";
+
+const TAG_OPTIONS = [
+  { label: "Data Dictionary", value: "data-dictionary" },
+  { label: "Schema", value: "schema" },
+  { label: "SOP", value: "sop" },
+  { label: "Policy", value: "policy" },
+  { label: "Presentation", value: "presentation" },
+  { label: "Video", value: "video" },
+  { label: "Other", value: "other" },
+];
+
+export default function UploadWithTags() {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const onPick = () => inputRef.current?.click();
+
+  const toggleTag = (value: string) => {
+    setSelected((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
+  };
+
+  const clearTag = (value: string) =>
+    setSelected((prev) => prev.filter((v) => v !== value));
+
+  const handleUpload = async () => {
+    if (!file) return;
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      // Supermemory expects containerTags as a JSON array string
+      fd.append("containerTags", JSON.stringify(selected));
+
+      // Send to your Next.js route wired to Supermemory
+      const res = await fetch("/api/knowledge/documents", {
+        method: "POST",
+        body: fd,
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Upload failed with ${res.status}`);
+      }
+
+      setSuccess("Uploaded successfully");
+      setFile(null);
+      setSelected([]);
+      if (inputRef.current) inputRef.current.value = "";
+    } catch (e: any) {
+      setError(e.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-balance">Dashboard</h1>
-          <p className="text-muted-foreground text-pretty">Monitor your knowledge base and Slack integration status</p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <Link href="/knowledge/upload">
-            <Button>
-              <Upload className="mr-2 h-4 w-4" />
-              Upload Documents
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Documents</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1,247</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Slack Queries</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">3,429</div>
-            <p className="text-xs text-muted-foreground">+8% from last week</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">89</div>
-            <p className="text-xs text-muted-foreground">+3 new this week</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">94.2%</div>
-            <p className="text-xs text-muted-foreground">+2.1% from last month</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Slack className="mr-2 h-5 w-5 text-primary" />
-              Slack Integration
-            </CardTitle>
-            <CardDescription>Your Slack workspace connection status</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Workspace Connected</span>
-              </div>
-              <Badge variant="secondary">Active</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Bot Installed</span>
-              </div>
-              <Badge variant="secondary">Ready</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="h-4 w-4 text-yellow-500" />
-                <span className="text-sm">Channels: 12 active</span>
-              </div>
-              <Link href="/integrations/slack">
-                <Button variant="outline" size="sm">
-                  Manage
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Bot className="mr-2 h-5 w-5 text-primary" />
-              Knowledge Processing
-            </CardTitle>
-            <CardDescription>Document indexing and AI model status</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Document Processing</span>
-                <span>847/1,247</span>
-              </div>
-              <Progress value={68} className="h-2" />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span className="text-sm">AI Model: Online</span>
-              </div>
-              <Badge variant="secondary">Healthy</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Vector Database: Ready</span>
-              </div>
-              <Link href="/knowledge">
-                <Button variant="outline" size="sm">
-                  View Details
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Latest queries and document uploads from your team</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[
-              { type: "query", user: "Sarah Chen", action: "asked about Q4 budget guidelines", time: "2 minutes ago" },
-              { type: "upload", user: "Mike Johnson", action: "uploaded HR Policy Update.pdf", time: "15 minutes ago" },
-              { type: "query", user: "Alex Rodriguez", action: "searched for API documentation", time: "1 hour ago" },
-              {
-                type: "upload",
-                user: "Emily Davis",
-                action: "uploaded Marketing Strategy 2024.docx",
-                time: "2 hours ago",
-              },
-            ].map((activity, index) => (
-              <div key={index} className="flex items-center space-x-4 p-3 rounded-lg bg-muted/30">
-                <div className="flex-shrink-0">
-                  {activity.type === "query" ? (
-                    <MessageSquare className="h-4 w-4 text-primary" />
-                  ) : (
-                    <Upload className="h-4 w-4 text-green-500" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">{activity.user}</p>
-                  <p className="text-sm text-muted-foreground">{activity.action}</p>
-                </div>
-                <div className="flex-shrink-0">
-                  <p className="text-xs text-muted-foreground">{activity.time}</p>
-                </div>
-              </div>
-            ))}
+    <div className="w-full max-w-xl rounded-2xl border bg-background p-4 shadow-sm">
+      <div className="flex flex-col gap-3">
+        {/* File chooser */}
+        <div className="flex items-center gap-3">
+          <input
+            ref={inputRef}
+            type="file"
+            className="hidden"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+          <Button onClick={onPick} variant="default" className="shrink-0">
+            <Upload className="mr-2 h-4 w-4" />
+            {file ? "Change file" : "Choose file"}
+          </Button>
+          <div className="truncate text-sm text-muted-foreground">
+            {file ? file.name : "No file selected"}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Tag selector */}
+        <div className="flex items-start gap-3">
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="shrink-0">
+                <Tag className="mr-2 h-4 w-4" />
+                Tags
+                <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 w-64" align="start">
+              <Command>
+                <CommandInput placeholder="Search tags..." />
+                <CommandList>
+                  <CommandEmpty>No tags found.</CommandEmpty>
+                  <CommandGroup heading="Available Tags">
+                    {TAG_OPTIONS.map((opt) => (
+                      <CommandItem
+                        key={opt.value}
+                        onSelect={() => toggleTag(opt.value)}
+                        className="cursor-pointer"
+                      >
+                        <div className="mr-2 mt-[1px]">
+                          <Checkbox checked={selected.includes(opt.value)} />
+                        </div>
+                        <span>{opt.label}</span>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+
+          {/* Selected tags */}
+          <div className="flex flex-wrap gap-2">
+            {selected.length === 0 ? (
+              <span className="text-sm text-muted-foreground">
+                No tags selected
+              </span>
+            ) : (
+              selected.map((value) => {
+                const label =
+                  TAG_OPTIONS.find((t) => t.value === value)?.label || value;
+                return (
+                  <Badge key={value} variant="secondary" className="gap-1">
+                    {label}
+                    <button
+                      aria-label={`Remove ${label}`}
+                      className="ml-1 rounded p-0.5 hover:bg-muted"
+                      onClick={() => clearTag(value)}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Upload action */}
+        <div className="flex items-center gap-3">
+          <Button onClick={handleUpload} disabled={!file || loading}>
+            {loading ? "Uploading..." : "Upload"}
+          </Button>
+          {error && <span className="text-sm text-red-600">{error}</span>}
+          {success && <span className="text-sm text-green-600">{success}</span>}
+        </div>
+      </div>
     </div>
-  )
+  );
 }
