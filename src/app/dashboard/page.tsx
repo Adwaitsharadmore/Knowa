@@ -1,247 +1,179 @@
 "use client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import {
-  FileText,
-  MessageSquare,
-  Users,
-  TrendingUp,
-  Slack,
-  CheckCircle,
-  AlertCircle,
-  Upload,
-  Bot,
-} from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { Upload, Tag, ChevronDown, X } from "lucide-react";
 
-type Doc = {
-  id: string;
-  name: string;
-  size: string;
-  uploadedAt: string;
-  status: "processed" | "processing";
-  type: string;
-};
+const TAG_OPTIONS = [
+  { label: "Data Dictionary", value: "data-dictionary" },
+  { label: "Schema", value: "schema" },
+  { label: "SOP", value: "sop" },
+  { label: "Policy", value: "policy" },
+  { label: "Presentation", value: "presentation" },
+  { label: "Video", value: "video" },
+  { label: "Other", value: "other" },
+];
 
-export default function DashboardPage() {
-  const [docs, setDocs] = useState<Doc[]>([]);
+export default function UploadWithTags() {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch("/api/knowledge/documents")
-      .then((r) => r.json())
-      .then(setDocs);
-  }, []);
+  const onPick = () => inputRef.current?.click();
 
-  const [stats, setStats] = useState({
-    total: 0,
-    processing: 0,
-    processed: 0,
-    recent: [],
-  });
-  useEffect(() => {
-    fetch("/api/knowledge/documents")
-      .then((res) => res.json())
-      .then((docs) => {
-        setStats({
-          total: docs.length,
-          processing: docs.filter((doc) => doc.status === "processing").length,
-          processed: docs.filter((doc) => doc.status === "processed").length,
-          recent: docs.slice(0, 4), // or fetch separate recent activity
-        });
+  const toggleTag = (value: string) => {
+    setSelected((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
+  };
+
+  const clearTag = (value: string) =>
+    setSelected((prev) => prev.filter((v) => v !== value));
+
+  const handleUpload = async () => {
+    if (!file) return;
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      // Supermemory expects containerTags as a JSON array string
+      fd.append("containerTags", JSON.stringify(selected));
+
+      // Send to your Next.js route wired to Supermemory
+      const res = await fetch("/api/knowledge/documents", {
+        method: "POST",
+        body: fd,
       });
-  }, []);
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Upload failed with ${res.status}`);
+      }
+
+      setSuccess("Uploaded successfully");
+      setFile(null);
+      setSelected([]);
+      if (inputRef.current) inputRef.current.value = "";
+    } catch (e: any) {
+      setError(e.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-balance">Dashboard</h1>
-          <p className="text-muted-foreground text-pretty">
-            Monitor your knowledge base and Slack integration status
-          </p>
+    <div className="w-full max-w-xl rounded-2xl border bg-background p-4 shadow-sm">
+      <div className="flex flex-col gap-3">
+        {/* File chooser */}
+        <div className="flex items-center gap-3">
+          <input
+            ref={inputRef}
+            type="file"
+            className="hidden"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+          <Button onClick={onPick} variant="default" className="shrink-0">
+            <Upload className="mr-2 h-4 w-4" />
+            {file ? "Change file" : "Choose file"}
+          </Button>
+          <div className="truncate text-sm text-muted-foreground">
+            {file ? file.name : "No file selected"}
+          </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <Link href="/knowledge/upload">
-            <Button>
-              <Upload className="mr-2 h-4 w-4" />
-              Upload Documents
-            </Button>
-          </Link>
-        </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Documents
-            </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              Documents in your knowledge base
-            </p>
-          </CardContent>
-        </Card>
+        {/* Tag selector */}
+        <div className="flex items-start gap-3">
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="shrink-0">
+                <Tag className="mr-2 h-4 w-4" />
+                Tags
+                <ChevronDown className="ml-2 h-4 w-4 opacity-70" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 w-64" align="start">
+              <Command>
+                <CommandInput placeholder="Search tags..." />
+                <CommandList>
+                  <CommandEmpty>No tags found.</CommandEmpty>
+                  <CommandGroup heading="Available Tags">
+                    {TAG_OPTIONS.map((opt) => (
+                      <CommandItem
+                        key={opt.value}
+                        onSelect={() => toggleTag(opt.value)}
+                        className="cursor-pointer"
+                      >
+                        <div className="mr-2 mt-[1px]">
+                          <Checkbox checked={selected.includes(opt.value)} />
+                        </div>
+                        <span>{opt.label}</span>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Processed</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.processed}</div>
-            <p className="text-xs text-muted-foreground">
-              Ready for AI queries
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Processing</CardTitle>
-            <AlertCircle className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.processing}</div>
-            <p className="text-xs text-muted-foreground">
-              Currently being indexed
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Slack Status</CardTitle>
-            <Slack className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary">Connected</Badge>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Workspace integrated
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Documents */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <FileText className="h-5 w-5" />
-              <span>Recent Documents</span>
-            </CardTitle>
-            <CardDescription>Your latest uploaded documents</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {docs.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No documents uploaded yet</p>
-                <Link href="/knowledge/upload">
-                  <Button variant="outline" className="mt-4">
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload Your First Document
-                  </Button>
-                </Link>
-              </div>
+          {/* Selected tags */}
+          <div className="flex flex-wrap gap-2">
+            {selected.length === 0 ? (
+              <span className="text-sm text-muted-foreground">
+                No tags selected
+              </span>
             ) : (
-              <div className="space-y-4">
-                {docs.slice(0, 5).map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <FileText className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">{doc.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {doc.type} • {doc.size} • {doc.uploadedAt}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge
-                      variant={
-                        doc.status === "processed" ? "default" : "secondary"
-                      }
+              selected.map((value) => {
+                const label =
+                  TAG_OPTIONS.find((t) => t.value === value)?.label || value;
+                return (
+                  <Badge key={value} variant="secondary" className="gap-1">
+                    {label}
+                    <button
+                      aria-label={`Remove ${label}`}
+                      className="ml-1 rounded p-0.5 hover:bg-muted"
+                      onClick={() => clearTag(value)}
                     >
-                      {doc.status === "processed" ? (
-                        <>
-                          <CheckCircle className="mr-1 h-3 w-3" /> Processed
-                        </>
-                      ) : (
-                        <>
-                          <AlertCircle className="mr-1 h-3 w-3" /> Processing
-                        </>
-                      )}
-                    </Badge>
-                  </div>
-                ))}
-                {docs.length > 5 && (
-                  <Link href="/knowledge/manage">
-                    <Button variant="ghost" className="w-full">
-                      View All Documents
-                    </Button>
-                  </Link>
-                )}
-              </div>
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                );
+              })
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Bot className="h-5 w-5" />
-              <span>Quick Actions</span>
-            </CardTitle>
-            <CardDescription>Common tasks and integrations</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Link href="/knowledge/upload">
-              <Button className="w-full justify-start">
-                <Upload className="mr-2 h-4 w-4" />
-                Upload New Document
-              </Button>
-            </Link>
-            <Link href="/knowledge/manage">
-              <Button variant="outline" className="w-full justify-start">
-                <FileText className="mr-2 h-4 w-4" />
-                Manage Documents
-              </Button>
-            </Link>
-            <Link href="/integrations/slack">
-              <Button variant="outline" className="w-full justify-start">
-                <Slack className="mr-2 h-4 w-4" />
-                Slack Settings
-              </Button>
-            </Link>
-            <Link href="/admin/settings">
-              <Button variant="outline" className="w-full justify-start">
-                <Users className="mr-2 h-4 w-4" />
-                Admin Settings
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <Separator />
+
+        {/* Upload action */}
+        <div className="flex items-center gap-3">
+          <Button onClick={handleUpload} disabled={!file || loading}>
+            {loading ? "Uploading..." : "Upload"}
+          </Button>
+          {error && <span className="text-sm text-red-600">{error}</span>}
+          {success && <span className="text-sm text-green-600">{success}</span>}
+        </div>
       </div>
     </div>
   );

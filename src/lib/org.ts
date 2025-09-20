@@ -1,5 +1,5 @@
 // /lib/org.ts
-import { supabaseServer } from "@/utills/supabase/server";
+import { supabaseServer } from "@/lib/supabase-server";
 
 export async function getUserDefaultOrgId() {
   const supabase = await supabaseServer();
