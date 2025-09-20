@@ -1,202 +1,193 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Bot, FileText, MessageSquare, Shield, Zap, Users } from "lucide-react"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArrowRight,
+  Bot,
+  FileText,
+  MessageSquare,
+  Shield,
+  Zap,
+  Users,
+  BarChart3,
+} from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Redirect to dashboard if user is authenticated, otherwise show landing page
+  // For now, we'll show the landing page and let users navigate to auth
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Bot className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold">Knowledge Copilot</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Badge variant="secondary">Beta</Badge>
-            <Button asChild>
-              <Link href="/integrations/slack">Get Started</Link>
-            </Button>
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Bot className="h-8 w-8 text-primary" />
+              <span className="text-xl font-semibold text-balance">
+                Enterprise Knowledge Copilot
+              </span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link href="/auth/login">
+                <Button variant="ghost">Sign in</Button>
+              </Link>
+              <Link href="/auth/signup">
+                <Button variant="outline">Sign up</Button>
+              </Link>
+              <Link href="/dashboard">
+                <Button>
+                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="container py-24 text-center">
-        <div className="mx-auto max-w-4xl space-y-8">
-          <div className="space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-              Enterprise Knowledge
-              <span className="text-primary"> Copilot</span>
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Connect your Slack workspace, upload company knowledge, and get accurate, source-backed answers instantly.
-              Built for teams that need reliable information.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Button size="lg" asChild className="text-lg">
-              <Link href="/integrations/slack">
-                <MessageSquare className="mr-2 h-5 w-5" />
-                Add to Slack
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="text-lg bg-transparent">
-              <Link href="/knowledge/upload">
-                <FileText className="mr-2 h-5 w-5" />
-                Upload Knowledge
-              </Link>
-            </Button>
+      <section className="py-20 px-6">
+        <div className="container mx-auto text-center max-w-4xl">
+          <Badge variant="secondary" className="mb-6">
+            Slack-First RAG System
+          </Badge>
+          <h1 className="text-5xl font-bold mb-6 text-balance">
+            Transform your company knowledge into
+            <span className="text-primary"> intelligent answers</span>
+          </h1>
+          <p className="text-xl text-muted-foreground mb-8 text-pretty max-w-2xl mx-auto">
+            Connect your Slack workspace, upload company documents, and get
+            accurate AI-powered answers with citations directly in your
+            channels.
+          </p>
+          <div className="flex items-center justify-center space-x-4">
+            <Link href="/dashboard">
+              <Button size="lg" className="text-lg px-8">
+                Start Building <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="/integrations">
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-lg px-8 bg-transparent"
+              >
+                View Integrations
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="container py-24">
-        <div className="mx-auto max-w-6xl">
+      <section className="py-20 px-6 bg-card/30">
+        <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight">Everything you need for enterprise knowledge</h2>
-            <p className="mt-4 text-lg text-muted-foreground">Powerful features designed for modern teams</p>
+            <h2 className="text-3xl font-bold mb-4 text-balance">
+              Everything you need for enterprise knowledge
+            </h2>
+            <p className="text-lg text-muted-foreground text-pretty max-w-2xl mx-auto">
+              Built for Slack admins who want to provide instant, accurate
+              answers to their teams.
+            </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardHeader>
-                <MessageSquare className="h-10 w-10 text-primary" />
+                <MessageSquare className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Slack Integration</CardTitle>
                 <CardDescription>
-                  Native Slack bot with channel-specific knowledge and memory across conversations
+                  Seamless OAuth setup with your Slack workspace. No technical
+                  setup required.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• OAuth 2.0 authentication</li>
-                  <li>• Channel-specific responses</li>
-                  <li>• Direct message support</li>
-                  <li>• Persistent memory</li>
-                </ul>
-              </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardHeader>
-                <FileText className="h-10 w-10 text-primary" />
-                <CardTitle>Knowledge Management</CardTitle>
+                <FileText className="h-12 w-12 text-primary mb-4" />
+                <CardTitle>Document Management</CardTitle>
                 <CardDescription>
-                  Upload documents, URLs, and text with intelligent processing and retrieval
+                  Upload PDFs, docs, and text files. Automatic processing and
+                  indexing for instant retrieval.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Multiple file formats</li>
-                  <li>• URL content extraction</li>
-                  <li>• Container-based tagging</li>
-                  <li>• Processing status tracking</li>
-                </ul>
-              </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardHeader>
-                <Shield className="h-10 w-10 text-primary" />
+                <Bot className="h-12 w-12 text-primary mb-4" />
+                <CardTitle>AI-Powered Answers</CardTitle>
+                <CardDescription>
+                  Get accurate responses with source citations. Powered by
+                  advanced RAG technology.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+              <CardHeader>
+                <Shield className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Enterprise Security</CardTitle>
-                <CardDescription>AES-256 encryption, rate limiting, and comprehensive audit logging</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Token encryption</li>
-                  <li>• Request verification</li>
-                  <li>• Rate limiting</li>
-                  <li>• Audit trails</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Zap className="h-10 w-10 text-primary" />
-                <CardTitle>RAG-Powered Answers</CardTitle>
                 <CardDescription>
-                  Accurate responses with source citations using advanced retrieval technology
+                  End-to-end encryption, audit logs, and compliance-ready
+                  security features.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Source-backed responses</li>
-                  <li>• Contextual understanding</li>
-                  <li>• Citation tracking</li>
-                  <li>• Confidence scoring</li>
-                </ul>
-              </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardHeader>
-                <Users className="h-10 w-10 text-primary" />
+                <Users className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Team Management</CardTitle>
-                <CardDescription>Workspace-level controls with channel permissions and user memory</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Workspace isolation</li>
-                  <li>• Channel permissions</li>
-                  <li>• User preferences</li>
-                  <li>• Admin controls</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Bot className="h-10 w-10 text-primary" />
-                <CardTitle>BYOSA Support</CardTitle>
                 <CardDescription>
-                  Bring Your Own Slack App for enterprise customers with custom requirements
+                  Manage workspace access, user permissions, and channel
+                  configurations.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Custom app manifests</li>
-                  <li>• White-label deployment</li>
-                  <li>• Enterprise controls</li>
-                  <li>• Custom branding</li>
-                </ul>
-              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+              <CardHeader>
+                <BarChart3 className="h-12 w-12 text-primary mb-4" />
+                <CardTitle>Analytics & Insights</CardTitle>
+                <CardDescription>
+                  Track usage, popular queries, and knowledge gaps with detailed
+                  analytics.
+                </CardDescription>
+              </CardHeader>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="border-t bg-muted/50">
-        <div className="container py-24 text-center">
-          <div className="mx-auto max-w-2xl space-y-8">
-            <h2 className="text-3xl font-bold tracking-tight">Ready to transform your team's knowledge?</h2>
-            <p className="text-lg text-muted-foreground">
-              Get started in minutes. Connect your Slack workspace and upload your first documents.
-            </p>
-            <Button size="lg" asChild className="text-lg">
-              <Link href="/integrations/slack">Start Free Trial</Link>
-            </Button>
-          </div>
+      <section className="py-20 px-6">
+        <div className="container mx-auto text-center">
+          <Card className="max-w-2xl mx-auto border-primary/20 bg-primary/5">
+            <CardHeader className="pb-8">
+              <CardTitle className="text-3xl mb-4 text-balance">
+                Ready to get started?
+              </CardTitle>
+              <CardDescription className="text-lg text-pretty">
+                Connect your Slack workspace and start building your knowledge
+                base in minutes.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/dashboard">
+                <Button size="lg" className="text-lg px-8">
+                  Launch Dashboard <Zap className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t">
-        <div className="container py-8">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="flex items-center space-x-2">
-              <Bot className="h-6 w-6 text-primary" />
-              <span className="font-semibold">Knowledge Copilot</span>
-            </div>
-            <p className="text-sm text-muted-foreground">© 2025 Enterprise Knowledge Copilot. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
-  )
+  );
 }

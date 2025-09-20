@@ -1,6 +1,6 @@
-import { LoginForm } from "@/components/auth/LoginForm";
+import { SignupForm } from "@/components/auth/SignupForm";
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -9,10 +9,10 @@ export default function LoginPage() {
             Enterprise Knowledge Copilot
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Secure access to your knowledge management system
+            Create your account to get started
           </p>
         </div>
-        <LoginForm />
+        <SignupForm />
       </div>
     </div>
   );

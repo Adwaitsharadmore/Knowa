@@ -1,11 +1,21 @@
-"use client"
+"use client";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Bot, LayoutDashboard, FileText, Settings, Users, BarChart3, Shield, Upload, Slack } from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Bot,
+  LayoutDashboard,
+  FileText,
+  Settings,
+  Users,
+  BarChart3,
+  Shield,
+  Upload,
+  Slack,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -16,36 +26,42 @@ const navigation = [
   { name: "Team Management", href: "/team", icon: Users },
   { name: "Security", href: "/security", icon: Shield },
   { name: "Settings", href: "/settings", icon: Settings },
-]
+];
 
 export function Sidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
-    <div className="flex h-full w-64 flex-col bg-card border-r border-border">
+    <div className="flex h-full w-64 flex-col border-r border-border bg-card/50 backdrop-blur-sm">
       <div className="flex h-16 items-center border-b border-border px-6">
-        <Bot className="h-8 w-8 text-primary" />
-        <span className="ml-2 text-lg font-semibold text-balance">Knowledge Copilot</span>
+        <div className="flex items-center space-x-2">
+          <Bot className="h-8 w-8 text-primary" />
+          <span className="text-lg font-semibold">Knowledge Copilot</span>
+        </div>
       </div>
 
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-2">
           {navigation.map((item) => {
-            const isActive = pathname === item.href
+            const isActive =
+              pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link key={item.name} href={item.href}>
                 <Button
                   variant={isActive ? "secondary" : "ghost"}
-                  className={cn("w-full justify-start", isActive && "bg-primary/10 text-primary hover:bg-primary/15")}
+                  className={cn(
+                    "w-full justify-start",
+                    isActive && "bg-primary/10 text-primary"
+                  )}
                 >
-                  <item.icon className="mr-3 h-4 w-4" />
+                  <item.icon className="mr-2 h-4 w-4" />
                   {item.name}
                 </Button>
               </Link>
-            )
+            );
           })}
         </nav>
       </ScrollArea>
     </div>
-  )
+  );
 }
