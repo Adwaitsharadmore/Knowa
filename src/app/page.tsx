@@ -46,7 +46,7 @@ export default async function HomePage() {
                     Welcome, {user.email}
                   </span>
                   <Link href="/dashboard">
-                    <Button>Dashboard</Button>
+                    <Button>Dashboard </Button>
                   </Link>
                   <form action="/api/auth/logout" method="post">
                     <Button variant="ghost" type="submit">
