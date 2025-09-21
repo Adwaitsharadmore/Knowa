@@ -173,6 +173,9 @@ importers:
       sonner:
         specifier: latest
         version: 2.0.7(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      supermemory:
+        specifier: 3.1.0
+        version: 3.1.0
       tailwind-merge:
         specifier: ^2.5.5
         version: 2.6.0
@@ -2031,6 +2034,9 @@ packages:
     resolution: {integrity: sha512-8EbVDiu9iN/nESwxeSxDKe0dunta1GOlHufmSSXxMD2z2/tMZpDMpvXQGsc+ajGo8y2uYUmixaSRUc/QPoQ0GA==}
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
+
+  supermemory@3.1.0:
+    resolution: {integrity: sha512-NwroE5BaNqp1rnpYJxmGruruipCzjRBnPgEschbxnUTMmZCcK1UtDZIAql7D6e57YpeBtb3TSt/B1Ff5RQ54oQ==}
 
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
@@ -3939,6 +3945,8 @@ snapshots:
       mz: 2.7.0
       pirates: 4.0.7
       ts-interface-checker: 0.1.13
+
+  supermemory@3.1.0: {}
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
