@@ -1,9 +1,7 @@
 // app/api/slack/events/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { WebClient } from "@slack/web-api";
-import { verifySlackSignature } from "@/lib/slack-verify";
 import { supabaseServer } from "@/lib/supabase-server";
-import { openSecret } from "@/lib/crypto/secrets";
 import { ragQuery } from "@/lib/supermemory/rag";
 
 export const dynamic = "force-dynamic";
@@ -16,14 +14,16 @@ function stripBotMention(text: string, botUserId?: string) {
 
 async function getInstallByTeam(teamId: string) {
   const supabase = await supabaseServer();
+
   const { data, error } = await supabase
-    .from("slack_installs")
+    .from("slack_team_org_links")
     .select("*")
     .eq("team_id", teamId)
     .maybeSingle();
   if (error || !data) return null;
   return data;
 }
+
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
@@ -41,37 +41,12 @@ export async function POST(req: NextRequest) {
   const teamId = payload.team_id || payload?.event?.team;
   const install = teamId ? await getInstallByTeam(teamId) : null;
 
-  // Verify signature with the BYO install's signing secret (fallback to env if you also support a single-tenant app)
-  const candidates: string[] = [];
-  if (install?.signing_secret_cipher) {
-    candidates.push(openSecret(install.signing_secret_cipher));
-  }
-  if (process.env.SLACK_SIGNING_SECRET) {
-    candidates.push(process.env.SLACK_SIGNING_SECRET);
-  }
-
-  const ok = candidates.some((secret) =>
-    verifySlackSignature({ signingSecret: secret, body: rawBody, timestamp, signature })
-  );
-  if (!ok) return new NextResponse("Bad signature", { status: 401 });
-
   if (payload.type === "url_verification") {
-    // (Optional) store api_app_id for stronger future lookups
-    if (install && payload.api_app_id && !install.api_app_id) {
-      const supabase = await supabaseServer();
-      await supabase
-        .from("slack_installs")
-        .update({ api_app_id: payload.api_app_id })
-        .eq("id", install.id);
-    }
     return NextResponse.json({ challenge: payload.challenge });
   }
 
   // Build Slack client with the right BYO token
-  let botToken = process.env.SLACK_BOT_TOKEN || ""; // fallback single-tenant
-  if (install?.bot_token_cipher) {
-    botToken = openSecret(install.bot_token_cipher);
-  }
+  let botToken = install?.bot_token || ""; // fallback single-tenant
   if (!botToken) return new NextResponse("No bot token for workspace", { status: 400 });
 
   const slack = new WebClient(botToken);
@@ -80,9 +55,8 @@ export async function POST(req: NextRequest) {
     const ev = payload.event;
 
     if (ev?.type === "app_mention") {
-      const botUserId: string | undefined = install?.bot_user_id || payload?.authorizations?.[0]?.user_id;
+      const botUserId: string | undefined = payload?.authorizations?.[0]?.user_id;
       const org_id: string = install?.org_id;
-      console.log("org_id", org_id);
 
       const rawText = String(ev.text ?? "");
       const query = stripBotMention(rawText, botUserId) || "(no text)";

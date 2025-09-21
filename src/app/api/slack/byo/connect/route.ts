@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { orgId, botToken, signingSecret, appToken, teamId } = body || {};
 
-    console.log("BYO connect request:", { orgId, botToken: botToken ? "***" : "missing", signingSecret: signingSecret ? "***" : "missing" });
+    console.log("BYO connect request:", { orgId, botToken: botToken , signingSecret: signingSecret });
 
     if (!orgId || !botToken || !signingSecret) {
       return NextResponse.json({ error: "orgId, botToken, and signingSecret are required" }, { status: 400 });
@@ -21,7 +21,6 @@ export async function POST(req: NextRequest) {
     const { data: membership } = await supabase
       .from("org_members").select("org_id").eq("org_id", orgId).eq("user_id", user.id).single();
     if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-
   // Verify bot token by calling auth.test
   try {
     const slack = new WebClient(botToken);
@@ -34,32 +33,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Could not determine team ID" }, { status: 400 });
     }
 
-    // For now, just verify the token works - no database storage
-    console.log("Slack token verified:", {
-      teamId: resolvedTeamId,
-      botUserId: botUserId,
-      teamName: test?.team
-    });
-
 
       const { data: existing } = await supabase
   .from("slack_team_org_links")
   .select("org_id")
   .eq("team_id", resolvedTeamId)
   .maybeSingle();
-
 if (existing && existing.org_id !== orgId) {
   return NextResponse.json(
     { error: "This Slack workspace is already linked to another organization." },
     { status: 409 }
   );
 }
-
 const { error: linkErr } = await supabase.from("slack_team_org_links").upsert({
   team_id: resolvedTeamId,
   org_id: orgId,
   created_by: user.id,
   source: "byo",
+  bot_token: botToken,
+  signing_secret: signingSecret
 });
 
 if (linkErr) {
