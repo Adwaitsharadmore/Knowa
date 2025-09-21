@@ -140,41 +140,9 @@ export default function SlackIntegrationPage() {
               )}
             </div>
 
-            {/* Organization selector */}
-            <div className="flex flex-col items-center gap-2">
-              <label className="text-sm font-medium">Select Organization</label>
-              <select
-                className="w-full max-w-md rounded-md border px-3 py-2 text-sm"
-                value={orgId}
-                onChange={(e) => setOrgId(e.target.value)}
-                disabled={loading || orgs.length === 0}
-              >
-                {orgs.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.name}
-                  </option>
-                ))}
-              </select>
-              {orgs.length === 0 && !loading && (
-                <p className="text-xs text-muted-foreground">
-                  You aren’t a member of any organizations yet.
-                </p>
-              )}
-            </div>
-
             {/* Mode toggle */}
             <div className="flex items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => setMode("oauth")}
-                className={`rounded-md border px-3 py-1.5 text-sm ${
-                  mode === "oauth"
-                    ? "border-primary ring-2 ring-primary/30"
-                    : "border-muted-foreground/30"
-                }`}
-              >
-                Add to Slack (recommended)
-              </button>
+            
               <button
                 type="button"
                 onClick={() => setMode("byo")}
@@ -184,7 +152,7 @@ export default function SlackIntegrationPage() {
                     : "border-muted-foreground/30"
                 }`}
               >
-                Bring Your Own Slack App
+                Connect Your Own Slack App
               </button>
             </div>
 
@@ -289,12 +257,6 @@ export default function SlackIntegrationPage() {
               </div>
             )}
 
-            {/* small note */}
-            <div className="text-center text-xs text-muted-foreground">
-              By connecting, you authorize Knowledge Copilot to access your
-              Slack workspace. We only request the minimum permissions needed to
-              function.
-            </div>
           </CardContent>
         </Card>
 
