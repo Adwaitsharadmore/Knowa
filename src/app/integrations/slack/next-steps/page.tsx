@@ -20,7 +20,7 @@ import {
   Shield,
   Zap,
 } from "lucide-react";
-import header from "@/components/layout/header";
+import header from "@/components/layout/Header";
 
 const WEBHOOK_URL = "https://daa4fbe52398.ngrok-free.app/api/slack/events";
 
@@ -34,8 +34,7 @@ function CopyField({ label, value }: { label: string; value: string }) {
     } catch {}
   }
   return (
-      <div className="space-y-1">
-          
+    <div className="space-y-1">
       <label className="text-sm font-medium">{label}</label>
       <div className="flex items-center gap-2">
         <input
