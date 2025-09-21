@@ -120,10 +120,6 @@ export default function SlackIntegrationPage() {
               <MessageSquare className="h-8 w-8 text-slack" />
             </div>
             <CardTitle className="text-xl">Slack Integration</CardTitle>
-            <CardDescription>
-              Choose how you want to connect to Slack and provide the required
-              details.
-            </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
@@ -142,7 +138,6 @@ export default function SlackIntegrationPage() {
 
             {/* Mode toggle */}
             <div className="flex items-center justify-center gap-3">
-            
               <button
                 type="button"
                 onClick={() => setMode("byo")}
@@ -203,42 +198,6 @@ export default function SlackIntegrationPage() {
                   </p>
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium">
-                    App-level Token (Socket Mode){" "}
-                    <span className="text-muted-foreground text-xs">
-                      (optional)
-                    </span>
-                  </label>
-                  <input
-                    className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
-                    placeholder="xapp-***"
-                    value={appToken}
-                    onChange={(e) => setAppToken(e.target.value)}
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Only needed if you prefer Socket Mode over HTTPS.
-                  </p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">
-                    Team ID{" "}
-                    <span className="text-muted-foreground text-xs">
-                      (optional)
-                    </span>
-                  </label>
-                  <input
-                    className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
-                    placeholder="T0123456789"
-                    value={teamId}
-                    onChange={(e) => setTeamId(e.target.value)}
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Helps us route events if you manage multiple workspaces.
-                  </p>
-                </div>
-
                 <div className="flex justify-center">
                   <Button size="lg" onClick={submitBYO} disabled={disabled}>
                     Connect with Provided Credentials
@@ -256,10 +215,69 @@ export default function SlackIntegrationPage() {
                 )}
               </div>
             )}
-
           </CardContent>
         </Card>
-
+        {/* Permissions Info (unchanged) */}
+        <Card className="bg-muted/50">
+          <CardHeader>
+            <CardTitle className="text-lg">Required Permissions</CardTitle>
+            <CardDescription>
+              Knowledge Copilot requests these permissions to function properly:
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  app_mentions:read
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Respond when mentioned
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  chat:write
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Send messages and replies
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  channels:read
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Access public channels
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  im:read
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Read direct messages
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  users:read
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Get user information
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  groups:read
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Access private channels
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         {/* Features Grid (unchanged) */}
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
@@ -323,68 +341,6 @@ export default function SlackIntegrationPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Permissions Info (unchanged) */}
-        <Card className="bg-muted/50">
-          <CardHeader>
-            <CardTitle className="text-lg">Required Permissions</CardTitle>
-            <CardDescription>
-              Knowledge Copilot requests these permissions to function properly:
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  app_mentions:read
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  Respond when mentioned
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  chat:write
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  Send messages and replies
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  channels:read
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  Access public channels
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  im:read
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  Read direct messages
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  users:read
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  Get user information
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  groups:read
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  Access private channels
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Next Steps (unchanged) */}
         <Card className="border-primary/20 bg-primary/5">
