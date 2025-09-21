@@ -1,46 +1,304 @@
-import { SlackConnectButton } from "@/components/slack/ConnectButton"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { CheckCircle, MessageSquare, Shield, Zap } from "lucide-react"
+// app/integrations/slack/page.tsx
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase-client";
+import { SlackConnectButton } from "@/components/slack/ConnectButton";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, MessageSquare, Shield, Zap } from "lucide-react";
+
+type Org = { id: string; name: string };
 
 export default function SlackIntegrationPage() {
+  const supabase = createClient();
+  const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [orgs, setOrgs] = useState<Org[]>([]);
+  const [orgId, setOrgId] = useState<string>("");
+
+  // mode: "oauth" | "byo"
+  const [mode, setMode] = useState<"oauth" | "byo">("oauth");
+
+  // BYO fields
+  const [botToken, setBotToken] = useState("");
+  const [signingSecret, setSigningSecret] = useState("");
+  const [appToken, setAppToken] = useState(""); // optional (Socket Mode)
+  const [teamId, setTeamId] = useState(""); // optional but helpful
+
+  const [submitStatus, setSubmitStatus] = useState<null | {
+    ok: boolean;
+    msg: string;
+  }>(null);
+  const disabled =
+    loading || !orgId || (mode === "byo" && (!botToken || !signingSecret));
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUserEmail(user?.email ?? null);
+
+      // fetch orgs for the signed-in user
+      const { data, error } = await supabase
+        .from("org_members")
+        .select("org_id, organizations!inner(id, name)")
+        .eq("user_id", user?.id ?? "")
+        .order("created_at", { ascending: true });
+
+      if (!error && data) {
+        const mapped = data.map((r: any) => ({
+          id: r.organizations.id,
+          name: r.organizations.name,
+        })) as Org[];
+        setOrgs(mapped);
+        if (mapped.length > 0) setOrgId(mapped[0].id);
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  async function submitBYO() {
+    setSubmitStatus(null);
+    try {
+      const res = await fetch("/api/slack/byo/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orgId,
+          botToken,
+          signingSecret,
+          appToken: appToken || null,
+          teamId: teamId || null,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setSubmitStatus({
+          ok: false,
+          msg: json?.error ?? "Failed to connect Slack (BYO)",
+        });
+      } else {
+        setSubmitStatus({ ok: true, msg: "Slack app connected successfully!" });
+        setBotToken("");
+        setSigningSecret("");
+        setAppToken("");
+        setTeamId("");
+      }
+    } catch (e: any) {
+      setSubmitStatus({ ok: false, msg: e?.message ?? "Network error" });
+    }
+  }
+
   return (
     <div className="container max-w-4xl py-8">
       <div className="space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold tracking-tight">Connect Your Slack Workspace</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Connect Your Slack Workspace
+          </h1>
           <p className="text-lg text-muted-foreground">
-            Add the Knowledge Copilot bot to your Slack workspace and start getting intelligent answers from your
-            company's knowledge base.
+            Add the Knowledge Copilot bot to your Slack workspace and start
+            getting intelligent answers from your company's knowledge base.
           </p>
         </div>
 
-        {/* Connection Card */}
+        {/* Connect Form */}
         <Card className="border-2">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slack/10">
               <MessageSquare className="h-8 w-8 text-slack" />
             </div>
             <CardTitle className="text-xl">Slack Integration</CardTitle>
-            <CardDescription>Connect your Slack workspace to enable the Knowledge Copilot bot</CardDescription>
+            <CardDescription>
+              Choose how you want to connect to Slack and provide the required
+              details.
+            </CardDescription>
           </CardHeader>
+
           <CardContent className="space-y-6">
-            <div className="flex justify-center">
-              <SlackConnectButton />
+            {/* Signed-in user */}
+            <div className="text-center text-sm text-muted-foreground">
+              {loading ? (
+                "Loading your account…"
+              ) : userEmail ? (
+                <>
+                  Signed in as <span className="font-medium">{userEmail}</span>
+                </>
+              ) : (
+                "Not signed in"
+              )}
             </div>
 
-            <div className="text-center text-sm text-muted-foreground">
-              <p>
-                By connecting, you authorize Knowledge Copilot to access your Slack workspace.
-                <br />
-                We only request the minimum permissions needed to function.
-              </p>
+            {/* Organization selector */}
+            <div className="flex flex-col items-center gap-2">
+              <label className="text-sm font-medium">Select Organization</label>
+              <select
+                className="w-full max-w-md rounded-md border px-3 py-2 text-sm"
+                value={orgId}
+                onChange={(e) => setOrgId(e.target.value)}
+                disabled={loading || orgs.length === 0}
+              >
+                {orgs.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </select>
+              {orgs.length === 0 && !loading && (
+                <p className="text-xs text-muted-foreground">
+                  You aren’t a member of any organizations yet.
+                </p>
+              )}
+            </div>
+
+            {/* Mode toggle */}
+            <div className="flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setMode("oauth")}
+                className={`rounded-md border px-3 py-1.5 text-sm ${
+                  mode === "oauth"
+                    ? "border-primary ring-2 ring-primary/30"
+                    : "border-muted-foreground/30"
+                }`}
+              >
+                Add to Slack (recommended)
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("byo")}
+                className={`rounded-md border px-3 py-1.5 text-sm ${
+                  mode === "byo"
+                    ? "border-primary ring-2 ring-primary/30"
+                    : "border-muted-foreground/30"
+                }`}
+              >
+                Bring Your Own Slack App
+              </button>
+            </div>
+
+            {/* OAuth mode */}
+            {mode === "oauth" && (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground text-center">
+                  We’ll request minimal user scopes to provision your tenant app
+                  via Slack’s App Manifest API.
+                </p>
+                <div className="flex justify-center">
+                  {/* Pass orgId so backend associates the install */}
+                  <SlackConnectButton orgId={orgId} />
+                </div>
+              </div>
+            )}
+
+            {/* BYO mode */}
+            {mode === "byo" && (
+              <div className="mx-auto max-w-xl space-y-4">
+                <div>
+                  <label className="text-sm font-medium">
+                    Bot Token <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+                    placeholder="xoxb-***"
+                    value={botToken}
+                    onChange={(e) => setBotToken(e.target.value)}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    From Slack → Your App → OAuth & Permissions.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">
+                    Signing Secret <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+                    placeholder="********"
+                    value={signingSecret}
+                    onChange={(e) => setSigningSecret(e.target.value)}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    From Slack → Your App → Basic Information.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">
+                    App-level Token (Socket Mode){" "}
+                    <span className="text-muted-foreground text-xs">
+                      (optional)
+                    </span>
+                  </label>
+                  <input
+                    className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+                    placeholder="xapp-***"
+                    value={appToken}
+                    onChange={(e) => setAppToken(e.target.value)}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Only needed if you prefer Socket Mode over HTTPS.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">
+                    Team ID{" "}
+                    <span className="text-muted-foreground text-xs">
+                      (optional)
+                    </span>
+                  </label>
+                  <input
+                    className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+                    placeholder="T0123456789"
+                    value={teamId}
+                    onChange={(e) => setTeamId(e.target.value)}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Helps us route events if you manage multiple workspaces.
+                  </p>
+                </div>
+
+                <div className="flex justify-center">
+                  <Button size="lg" onClick={submitBYO} disabled={disabled}>
+                    Connect with Provided Credentials
+                  </Button>
+                </div>
+
+                {submitStatus && (
+                  <p
+                    className={`text-center text-sm ${
+                      submitStatus.ok ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {submitStatus.msg}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* small note */}
+            <div className="text-center text-xs text-muted-foreground">
+              By connecting, you authorize Knowledge Copilot to access your
+              Slack workspace. We only request the minimum permissions needed to
+              function.
             </div>
           </CardContent>
         </Card>
 
-        {/* Features Grid */}
+        {/* Features Grid (unchanged) */}
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
@@ -51,8 +309,9 @@ export default function SlackIntegrationPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Get accurate answers with source citations from your knowledge base. The bot understands context and
-                provides relevant information.
+                Get accurate answers with source citations from your knowledge
+                base. The bot understands context and provides relevant
+                information.
               </p>
             </CardContent>
           </Card>
@@ -66,8 +325,8 @@ export default function SlackIntegrationPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                All data is encrypted and workspace-isolated. Your information stays within your organization's
-                boundaries.
+                All data is encrypted and workspace-isolated. Your information
+                stays within your organization's boundaries.
               </p>
             </CardContent>
           </Card>
@@ -81,8 +340,8 @@ export default function SlackIntegrationPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                The bot remembers your preferences and conversation context across days, providing personalized
-                assistance.
+                The bot remembers your preferences and conversation context
+                across days, providing personalized assistance.
               </p>
             </CardContent>
           </Card>
@@ -96,18 +355,20 @@ export default function SlackIntegrationPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Works in public channels, private channels, and direct messages. Configure which channels have access to
-                specific knowledge.
+                Works in public channels, private channels, and direct messages.
+                Configure which channels have access to specific knowledge.
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Permissions Info */}
+        {/* Permissions Info (unchanged) */}
         <Card className="bg-muted/50">
           <CardHeader>
             <CardTitle className="text-lg">Required Permissions</CardTitle>
-            <CardDescription>Knowledge Copilot requests these permissions to function properly:</CardDescription>
+            <CardDescription>
+              Knowledge Copilot requests these permissions to function properly:
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -115,43 +376,55 @@ export default function SlackIntegrationPage() {
                 <Badge variant="outline" className="text-xs">
                   app_mentions:read
                 </Badge>
-                <span className="text-sm text-muted-foreground">Respond when mentioned</span>
+                <span className="text-sm text-muted-foreground">
+                  Respond when mentioned
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
                   chat:write
                 </Badge>
-                <span className="text-sm text-muted-foreground">Send messages and replies</span>
+                <span className="text-sm text-muted-foreground">
+                  Send messages and replies
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
                   channels:read
                 </Badge>
-                <span className="text-sm text-muted-foreground">Access public channels</span>
+                <span className="text-sm text-muted-foreground">
+                  Access public channels
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
                   im:read
                 </Badge>
-                <span className="text-sm text-muted-foreground">Read direct messages</span>
+                <span className="text-sm text-muted-foreground">
+                  Read direct messages
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
                   users:read
                 </Badge>
-                <span className="text-sm text-muted-foreground">Get user information</span>
+                <span className="text-sm text-muted-foreground">
+                  Get user information
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
                   groups:read
                 </Badge>
-                <span className="text-sm text-muted-foreground">Access private channels</span>
+                <span className="text-sm text-muted-foreground">
+                  Access private channels
+                </span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Next Steps */}
+        {/* Next Steps (unchanged) */}
         <Card className="border-primary/20 bg-primary/5">
           <CardHeader>
             <CardTitle className="text-lg">What happens next?</CardTitle>
@@ -187,5 +460,5 @@ export default function SlackIntegrationPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

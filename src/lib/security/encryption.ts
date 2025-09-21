@@ -1,77 +1,46 @@
-import crypto from "crypto"
+// src/lib/security/encryption.ts
+import * as crypto from "crypto"; // or: import crypto from "crypto" (if esModuleInterop)
 
-const ALGORITHM = "aes-256-gcm"
-const KEY_LENGTH = 32
-const IV_LENGTH = 16
-const TAG_LENGTH = 16
+const ALGORITHM = "aes-256-gcm";
+const IV_LENGTH = 12;      // 96-bit nonce for GCM
+const TAG_LENGTH = 16;     // 128-bit auth tag
+const KEY_LENGTH = 32;     // 256-bit key
 
-function getEncryptionKey(): Buffer {
-  const key = process.env.ENCRYPTION_KEY
-  if (!key) {
-    throw new Error("ENCRYPTION_KEY environment variable is required")
+function getKey(): Buffer {
+  const b64 = process.env.ENCRYPTION_KEY;
+  if (!b64) throw new Error("ENCRYPTION_KEY environment variable is required");
+  const key = Buffer.from(b64, "base64");
+  if (key.length !== KEY_LENGTH) {
+    throw new Error("ENCRYPTION_KEY must be 32 bytes (base64-encoded)");
   }
-  return crypto.scryptSync(key, "salt", KEY_LENGTH)
+  return key;
 }
 
-export function encrypt(text: string): string {
-  try {
-    const key = getEncryptionKey()
-    const iv = crypto.randomBytes(IV_LENGTH)
-    const cipher = crypto.createCipher(ALGORITHM, key)
-    cipher.setAAD(Buffer.from("additional-data"))
+/**
+ * Returns a compact base64 blob: [iv(12) | tag(16) | ciphertext]
+ */
+export function encrypt(plaintext: string): string {
+  const key = getKey();
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
 
-    let encrypted = cipher.update(text, "utf8", "hex")
-    encrypted += cipher.final("hex")
+  const ciphertext = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+  const tag = cipher.getAuthTag();
 
-    const tag = cipher.getAuthTag()
-
-    // Combine iv + tag + encrypted data
-    return iv.toString("hex") + tag.toString("hex") + encrypted
-  } catch (error) {
-    console.error("Encryption error:", error)
-    throw new Error("Failed to encrypt data")
-  }
+  return Buffer.concat([iv, tag, ciphertext]).toString("base64");
 }
 
-export function decrypt(encryptedData: string): string {
-  try {
-    const key = getEncryptionKey()
+export function decrypt(blob: string): string {
+  const key = getKey();
+  const buf = Buffer.from(blob, "base64");
 
-    // Extract components
-    const iv = Buffer.from(encryptedData.slice(0, IV_LENGTH * 2), "hex")
-    const tag = Buffer.from(encryptedData.slice(IV_LENGTH * 2, (IV_LENGTH + TAG_LENGTH) * 2), "hex")
-    const encrypted = encryptedData.slice((IV_LENGTH + TAG_LENGTH) * 2)
+  const iv = buf.subarray(0, IV_LENGTH);
+  const tag = buf.subarray(IV_LENGTH, IV_LENGTH + TAG_LENGTH);
+  const ciphertext = buf.subarray(IV_LENGTH + TAG_LENGTH);
 
-    const decipher = crypto.createDecipher(ALGORITHM, key)
-    decipher.setAuthTag(tag)
-    decipher.setAAD(Buffer.from("additional-data"))
+  const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+  decipher.setAuthTag(tag);
 
-    let decrypted = decipher.update(encrypted, "hex", "utf8")
-    decrypted += decipher.final("utf8")
-
-    return decrypted
-  } catch (error) {
-    console.error("Decryption error:", error)
-    throw new Error("Failed to decrypt data")
-  }
-}
-
-export function hashPassword(password: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const salt = crypto.randomBytes(16).toString("hex")
-    crypto.pbkdf2(password, salt, 10000, 64, "sha512", (err, derivedKey) => {
-      if (err) reject(err)
-      resolve(salt + ":" + derivedKey.toString("hex"))
-    })
-  })
-}
-
-export function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const [salt, key] = hash.split(":")
-    crypto.pbkdf2(password, salt, 10000, 64, "sha512", (err, derivedKey) => {
-      if (err) reject(err)
-      resolve(key === derivedKey.toString("hex"))
-    })
-  })
+  const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+  return plaintext.toString("utf8");
 }
