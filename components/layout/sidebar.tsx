@@ -19,13 +19,13 @@ import { usePathname } from "next/navigation";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Knowledge Base", href: "/knowledge", icon: FileText },
+  // { name: "Knowledge Base", href: "/knowledge", icon: FileText },
   { name: "Slack Integration", href: "/integrations/slack", icon: Slack },
-  { name: "Upload Documents", href: "/knowledge/upload", icon: Upload },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
-  { name: "Team Management", href: "/team", icon: Users },
-  { name: "Security", href: "/security", icon: Shield },
-  { name: "Settings", href: "/settings", icon: Settings },
+  // { name: "Upload Documents", href: "/knowledge/upload", icon: Upload },
+  // { name: "Analytics", href: "/analytics", icon: BarChart3 },
+  // { name: "Team Management", href: "/team", icon: Users },
+  // { name: "Security", href: "/security", icon: Shield },
+  // { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {

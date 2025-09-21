@@ -27,7 +27,7 @@ interface SidebarProps {
 const navigation = [
   {
     name: "Dashboard",
-    href: "/admin",
+    href: "/dashboard",
     icon: BarChart3,
     badge: null,
   },
@@ -37,42 +37,42 @@ const navigation = [
     icon: MessageSquare,
     badge: null,
   },
-  {
-    name: "Knowledge Base",
-    href: "/knowledge/manage",
-    icon: Database,
-    badge: null,
-  },
-  {
-    name: "Upload Documents",
-    href: "/knowledge/upload",
-    icon: Upload,
-    badge: null,
-  },
-  {
-    name: "Document Sources",
-    href: "/knowledge/sources",
-    icon: FileText,
-    badge: null,
-  },
-  {
-    name: "User Management",
-    href: "/admin/users",
-    icon: Users,
-    badge: null,
-  },
-  {
-    name: "Settings",
-    href: "/admin/settings",
-    icon: Settings,
-    badge: null,
-  },
-  {
-    name: "Security",
-    href: "/admin/security",
-    icon: Shield,
-    badge: "Pro",
-  },
+  // {
+  //   name: "Knowledge Base",
+  //   href: "/knowledge/manage",
+  //   icon: Database,
+  //   badge: null,
+  // },
+  // {
+  //   name: "Upload Documents",
+  //   href: "/knowledge/upload",
+  //   icon: Upload,
+  //   badge: null,
+  // },
+  // {
+  //   name: "Document Sources",
+  //   href: "/knowledge/sources",
+  //   icon: FileText,
+  //   badge: null,
+  // },
+  // {
+  //   name: "User Management",
+  //   href: "/admin/users",
+  //   icon: Users,
+  //   badge: null,
+  // },
+  // {
+  //   name: "Settings",
+  //   href: "/admin/settings",
+  //   icon: Settings,
+  //   badge: null,
+  // },
+  // {
+  //   name: "Security",
+  //   href: "/admin/security",
+  //   icon: Shield,
+  //   badge: "Pro",
+  // },
 ]
 
 const Sidebar = ({ className }: SidebarProps) => {

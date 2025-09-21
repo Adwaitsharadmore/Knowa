@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, MessageSquare, Shield, Zap } from "lucide-react";
 import { useRouter } from "next/navigation"; 
+import Sidebar from "@/components/layout/Sidebar";
 
 type Org = { id: string; name: string };
 
@@ -102,7 +103,8 @@ const router = useRouter();
   }
 
   return (
-    <div className="container max-w-4xl py-8">
+    <div className="flex h-screen bg-background">
+      <Sidebar />
       <div className="space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
