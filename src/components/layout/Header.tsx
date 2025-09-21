@@ -14,7 +14,7 @@ import { Bell, Search, User, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 
-export function Header() {
+export default function Header() {
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card/50 backdrop-blur-sm px-6">
       <div className="flex items-center space-x-4 flex-1">

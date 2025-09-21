@@ -75,7 +75,7 @@ const navigation = [
   },
 ]
 
-export function Sidebar({ className }: SidebarProps) {
+export default function Sidebar({ className }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
 
