@@ -23,21 +23,7 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@/components/*": [
-        "src/components/*"
-      ],
-      "@/lib/*": [
-        "src/lib/*"
-      ],
-      "@/types/*": [
-        "src/types/*"
-      ],
-      "@/hooks/*": [
-        "src/hooks/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "target": "ES2017"
   },
