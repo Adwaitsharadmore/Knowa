@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, MessageSquare, Shield, Zap } from "lucide-react";
+import { useRouter } from "next/navigation"; 
 
 type Org = { id: string; name: string };
 
@@ -23,7 +24,7 @@ export default function SlackIntegrationPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [orgId, setOrgId] = useState<string>("");
-
+const router = useRouter();
   // mode: "oauth" | "byo"
   const [mode, setMode] = useState<"oauth" | "byo">("oauth");
 
@@ -93,6 +94,7 @@ export default function SlackIntegrationPage() {
         setSigningSecret("");
         setAppToken("");
         setTeamId("");
+        router.push(`/integrations/slack/next-steps?orgId=${orgId}`);
       }
     } catch (e: any) {
       setSubmitStatus({ ok: false, msg: e?.message ?? "Network error" });
