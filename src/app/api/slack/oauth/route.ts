@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { exchangeCodeForToken, getTeamInfo } from "@/lib/slack/auth"
+import { SlackApiClient } from "@/lib/slack/api"
 import { prisma } from "@/lib/database/client"
 import { encrypt } from "@/lib/security/encryption"
 
@@ -19,8 +19,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Exchange code for access token
-    const tokenData = await exchangeCodeForToken(code)
-    const teamInfo = await getTeamInfo(tokenData.access_token)
+    const client = new SlackApiClient("") // Empty token for OAuth exchange
+    const tokenData = await client.exchangeCodeForToken(
+      code,
+      process.env.SLACK_CLIENT_ID!,
+      process.env.SLACK_CLIENT_SECRET!,
+      process.env.SLACK_REDIRECT_URI!
+    )
+    
+    // Create client with the access token to get team info
+    const authenticatedClient = new SlackApiClient(tokenData.access_token)
+    const teamInfo = await authenticatedClient.getTeamInfo()
 
     // Create or update workspace
     const workspace = await prisma.workspace.upsert({
