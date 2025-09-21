@@ -21,13 +21,9 @@ import { Separator } from "@/components/ui/separator";
 import { Upload, Tag, ChevronDown, X } from "lucide-react";
 
 const TAG_OPTIONS = [
-  { label: "Data Dictionary", value: "data-dictionary" },
-  { label: "Schema", value: "schema" },
-  { label: "SOP", value: "sop" },
-  { label: "Policy", value: "policy" },
-  { label: "Presentation", value: "presentation" },
-  { label: "Video", value: "video" },
-  { label: "Other", value: "other" },
+  { label: "Data Dictionary & Schema", value: "data-dictionary" },
+  { label: "Onboarding", value: "onboarding" },
+  { label: "Training", value: "training" },
 ];
 
 export default function UploadWithTags() {
@@ -59,14 +55,14 @@ export default function UploadWithTags() {
       const fd = new FormData();
       fd.append("file", file);
       // Supermemory expects containerTags as a JSON array string
-      fd.append("containerTags", JSON.stringify(selected));
+      fd.append("metadata", JSON.stringify({"tags": selected}));
 
       // Send to your Next.js route wired to Supermemory
       const res = await fetch("/api/knowledge/documents", {
         method: "POST",
         body: fd,
       });
-
+      console.log("fd", fd);
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || `Upload failed with ${res.status}`);

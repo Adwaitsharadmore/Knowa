@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUserDefaultOrgId } from "@/lib/org";
+import { getUserOrganizations } from "@/lib/org";
 
 // GET method to fetch documents
 export async function GET() {
@@ -56,7 +56,7 @@ function getFileType(filename: string): string {
 
 export async function POST(request: Request) {
   try {
-    const orgId = await getUserDefaultOrgId();
+    const orgId = await getUserOrganizations();
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -64,7 +64,9 @@ export async function POST(request: Request) {
 
     const smForm = new FormData();
     smForm.append("file", file, file.name);
-    smForm.append("containerTags", JSON.stringify([`org-${orgId}`]));
+    smForm.append("containerTags", 'org_id-'+orgId[0].org_id);
+    smForm.append("metadata", JSON.stringify(JSON.parse(formData.get("metadata") as string)));
+    console.log("smForm", smForm);
 
     const resp = await fetch("https://api.supermemory.ai/v3/documents/file", {
       method: "POST",
@@ -76,8 +78,8 @@ export async function POST(request: Request) {
       const text = await resp.text();
       return NextResponse.json({ success: false, message: text || "Supermemory API error" }, { status: 502 });
     }
-
     const sm = await resp.json();
+    console.log("result from supermemory", sm);
     return NextResponse.json({ success: true, result: sm });
   } catch (e: any) {
     return NextResponse.json({ success: false, message: e.message ?? "Unknown error" }, { status: 500 });
