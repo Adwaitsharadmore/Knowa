@@ -1,3 +1,5 @@
+"use client";
+
 import { FileUploader } from "@/components/knowledge/FileUploader"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
