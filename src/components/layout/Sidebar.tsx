@@ -18,6 +18,7 @@ import {
   Shield,
   ChevronLeft,
   ChevronRight,
+  Building2,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -35,6 +36,12 @@ const navigation = [
     name: "Slack Integration",
     href: "/integrations/slack",
     icon: MessageSquare,
+    badge: null,
+  },
+  {
+    name: "Organization Form",
+    href: "/organization",
+    icon: Building2,
     badge: null,
   },
   // {
