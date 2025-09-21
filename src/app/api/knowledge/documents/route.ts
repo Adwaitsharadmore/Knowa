@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     const sm = await client.documents.uploadFile({
       file,
       containerTags: `org_id-${orgId[0].org_id}`,
-      // metadata: metadata,
+      metadata: metadata,
     });
 
     return NextResponse.json({ success: true, result: sm });
