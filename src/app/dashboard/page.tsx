@@ -80,10 +80,10 @@ export default function UploadWithTags() {
   };
 
   return (
-    <div className="w-full max-w-xl rounded-2xl border bg-background p-4 shadow-sm">
+    <div className="w-full rounded-2xl border bg-background p-4 shadow-sm">
       <div className="flex flex-col gap-3">
         {/* File chooser */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 max-w-xl">
           <input
             ref={inputRef}
             type="file"
@@ -91,7 +91,7 @@ export default function UploadWithTags() {
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
           <Button onClick={onPick} variant="default" className="shrink-0">
-            <Upload className="mr-2 h-4 w-4" />
+            <Upload className="mr-2 h-4" />
             {file ? "Change file" : "Choose file"}
           </Button>
           <div className="truncate text-sm text-muted-foreground">

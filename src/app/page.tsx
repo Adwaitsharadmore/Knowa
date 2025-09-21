@@ -19,10 +19,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { supabaseServer } from "@/lib/supabase-server";
 
 export default async function HomePage() {
-  // Redirect to dashboard if user is authenticated, otherwise show landing page
-  // For now, we'll show the landing page and let users navigate to auth
+  // Check if user is authenticated
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
@@ -35,17 +40,35 @@ export default async function HomePage() {
               </span>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/auth/login">
-                <Button variant="ghost">Sign in</Button>
-              </Link>
-              <Link href="/auth/signup">
-                <Button variant="outline">Sign up</Button>
-              </Link>
-              <Link href="/dashboard">
-                <Button>
-                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  <span className="text-sm text-muted-foreground">
+                    Welcome, {user.email}
+                  </span>
+                  <Link href="/dashboard">
+                    <Button>Dashboard</Button>
+                  </Link>
+                  <form action="/api/auth/logout" method="post">
+                    <Button variant="ghost" type="submit">
+                      Sign out
+                    </Button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth/login">
+                    <Button variant="ghost">Sign in</Button>
+                  </Link>
+                  <Link href="/auth/signup">
+                    <Button variant="outline">Sign up</Button>
+                  </Link>
+                  <Link href="/dashboard">
+                    <Button>
+                      Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -53,34 +76,68 @@ export default async function HomePage() {
 
       <section className="py-20 px-6">
         <div className="container mx-auto text-center max-w-4xl">
-          <Badge variant="secondary" className="mb-6">
-            Slack-First RAG System
-          </Badge>
-          <h1 className="text-5xl font-bold mb-6 text-balance">
-            Transform your company knowledge into
-            <span className="text-primary"> intelligent answers</span>
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 text-pretty max-w-2xl mx-auto">
-            Connect your Slack workspace, upload company documents, and get
-            accurate AI-powered answers with citations directly in your
-            channels.
-          </p>
-          <div className="flex items-center justify-center space-x-4">
-            <Link href="/dashboard">
-              <Button size="lg" className="text-lg px-8">
-                Start Building <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/integrations">
-              <Button
-                variant="outline"
-                size="lg"
-                className="text-lg px-8 bg-transparent"
-              >
-                View Integrations
-              </Button>
-            </Link>
-          </div>
+          {user ? (
+            <>
+              <Badge variant="secondary" className="mb-6">
+                Welcome back!
+              </Badge>
+              <h1 className="text-5xl font-bold mb-6 text-balance">
+                Ready to continue building your
+                <span className="text-primary"> knowledge base?</span>
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8 text-pretty max-w-2xl mx-auto">
+                Access your dashboard to manage documents, view analytics, and
+                configure your Slack integration.
+              </p>
+              <div className="flex items-center justify-center space-x-4">
+                <Link href="/dashboard">
+                  <Button size="lg" className="text-lg px-8">
+                    Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link href="/integrations">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="text-lg px-8 bg-transparent"
+                  >
+                    Manage Integrations
+                  </Button>
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <Badge variant="secondary" className="mb-6">
+                Slack-First RAG System
+              </Badge>
+              <h1 className="text-5xl font-bold mb-6 text-balance">
+                Transform your company knowledge into
+                <span className="text-primary"> intelligent answers</span>
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8 text-pretty max-w-2xl mx-auto">
+                Connect your Slack workspace, upload company documents, and get
+                accurate AI-powered answers with citations directly in your
+                channels.
+              </p>
+              <div className="flex items-center justify-center space-x-4">
+                <Link href="/auth/signup">
+                  <Button size="lg" className="text-lg px-8">
+                    Get Started <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link href="/integrations">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="text-lg px-8 bg-transparent"
+                  >
+                    View Integrations
+                  </Button>
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -166,28 +223,30 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="py-20 px-6">
-        <div className="container mx-auto text-center">
-          <Card className="max-w-2xl mx-auto border-primary/20 bg-primary/5">
-            <CardHeader className="pb-8">
-              <CardTitle className="text-3xl mb-4 text-balance">
-                Ready to get started?
-              </CardTitle>
-              <CardDescription className="text-lg text-pretty">
-                Connect your Slack workspace and start building your knowledge
-                base in minutes.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="/dashboard">
-                <Button size="lg" className="text-lg px-8">
-                  Launch Dashboard <Zap className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+      {!user && (
+        <section className="py-20 px-6">
+          <div className="container mx-auto text-center">
+            <Card className="max-w-2xl mx-auto border-primary/20 bg-primary/5">
+              <CardHeader className="pb-8">
+                <CardTitle className="text-3xl mb-4 text-balance">
+                  Ready to get started?
+                </CardTitle>
+                <CardDescription className="text-lg text-pretty">
+                  Connect your Slack workspace and start building your knowledge
+                  base in minutes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/auth/signup">
+                  <Button size="lg" className="text-lg px-8">
+                    Sign Up Now <Zap className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
