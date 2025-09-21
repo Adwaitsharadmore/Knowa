@@ -20,7 +20,7 @@ import {
   Shield,
   Zap,
 } from "lucide-react";
-import Header from "@/components/layout/header";
+import header from "@/components/layout/header";
 
 const WEBHOOK_URL = "https://daa4fbe52398.ngrok-free.app/api/slack/events";
 
@@ -63,7 +63,7 @@ export default function SlackNextStepsPage() {
 
   return (
     <div className="container max-w-full py-8">
-      <Header />
+      <header />
       <div className="space-y-8">
         {/* Header */}
         <div className="text-start space-y-2">
