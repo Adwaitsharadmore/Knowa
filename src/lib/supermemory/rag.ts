@@ -11,18 +11,19 @@ const openai = new OpenAI({
 
 export async function ragQuery(query: string, org_id: string) {
   // 1. Retrieve relevant memories
-  const searchResults = await client.search.memories({
+  const searchResults = await client.search.documents({
     q: query,
-    containerTag: org_id,
-    limit: 20,
-    threshold: 0.3
+    containerTags: ["org_id-cfefd35e-5b28-438a-b12d-76070e99bab9"],
+    limit: 10,
   });
-
+  console.log("org_id", org_id);
+  console.log("searchResults", searchResults);
   // 2. Build context from retrieved memories
   const context = searchResults.results
-    .map(r => r.memory)
+    .map(r => r.chunks.map(c => c.content).join('\n\n'))
     .join('\n\n');
 
+  console.log("context", context, query);
   // 3. Generate response with context
   const response = await openai.chat.completions.create({
     model: 'gpt-4',
@@ -57,6 +58,6 @@ Remember: Only use information from the onboarding context above. Focus on helpi
     ],
     temperature: 0.5,
   });
-  console.log(" rag response", response);
+  console.log(" rag response", response, response.choices[0].message);
   return response.choices[0].message.content;
 }

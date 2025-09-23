@@ -134,7 +134,7 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Knowledge Base</h1>
         <p className="text-muted-foreground">
-          Upload documents or connect to Google Drive to build your knowledge base
+          Upload documents or connect to Google Drive to build your knowledge base with Knowa
         </p>
       </div>
 

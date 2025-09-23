@@ -17,8 +17,23 @@ import { LogoutButton } from "@/components/auth/LogoutButton";
 const Header = () => {
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card/50 backdrop-blur-sm px-6">
-      <div className="flex items-center space-x-4 flex-1">
-        <div className="relative max-w-md flex-1">
+      {/* Logo and Title */}
+      <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2">
+          <div className="relative w-8 h-8">
+            <img
+              src="/knowa-logo.svg"
+              alt="Knowa Logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <h1 className="text-xl font-bold text-foreground">Knowa</h1>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="flex items-center space-x-4 flex-1 max-w-md mx-8">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search knowledge base..."
@@ -27,6 +42,7 @@ const Header = () => {
         </div>
       </div>
 
+      {/* User Menu */}
       <div className="flex items-center space-x-4">
         <Button variant="ghost" size="icon">
           <Bell className="h-4 w-4" />

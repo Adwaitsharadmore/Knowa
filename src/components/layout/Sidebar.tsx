@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import {
-  Bot,
   FileText,
   MessageSquare,
   Settings,
@@ -98,8 +97,25 @@ const Sidebar = ({ className }: SidebarProps) => {
       <div className="flex h-16 items-center justify-between border-b px-4">
         {!collapsed && (
           <div className="flex items-center space-x-2">
-            <Bot className="h-6 w-6 text-primary" />
-            <span className="font-semibold">Knowledge Copilot</span>
+            <div className="relative w-6 h-6">
+              <img
+                src="/knowa-logo.svg"
+                alt="Knowa Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <span className="font-semibold text-lg">Knowa</span>
+          </div>
+        )}
+        {collapsed && (
+          <div className="flex items-center justify-center w-full">
+            <div className="relative w-6 h-6">
+              <img
+                src="/knowa-logo.svg"
+                alt="Knowa Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
           </div>
         )}
         <Button variant="ghost" size="sm" onClick={() => setCollapsed(!collapsed)} className="h-8 w-8 p-0">

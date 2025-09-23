@@ -7,9 +7,14 @@ import { Toaster } from "sonner"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Enterprise Knowledge Copilot",
-  description: "Slack-first RAG system for enterprise knowledge management",
-  keywords: ["slack", "knowledge management", "RAG", "enterprise", "AI"],
+  title: "Knowa - Enterprise Knowledge Copilot",
+  description: "AI-powered knowledge management platform for enterprises. Connect, organize, and access your knowledge base with intelligent search and automation.",
+  keywords: ["knowledge management", "AI", "enterprise", "RAG", "document management", "search", "automation"],
+  openGraph: {
+    title: "Knowa - Enterprise Knowledge Copilot",
+    description: "AI-powered knowledge management platform for enterprises",
+    type: "website",
+  },
 }
 
 export default function RootLayout({

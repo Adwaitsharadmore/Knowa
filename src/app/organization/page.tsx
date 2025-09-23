@@ -174,9 +174,9 @@ export default function OrganizationFormPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Organization Form</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Organization Resources</h1>
           <p className="text-muted-foreground">
-            Manage your organization resources and links
+            Manage your organization resources and links with Knowa
           </p>
         </div>
         
@@ -184,14 +184,14 @@ export default function OrganizationFormPage() {
           <DialogTrigger asChild>
             <Button className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
-              Add Form
+              Add Resource
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Add Organization Item</DialogTitle>
+              <DialogTitle>Add Organization Resource</DialogTitle>
               <DialogDescription>
-                Add a new item to your organization resources.
+                Add a new resource to your organization knowledge base.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -239,7 +239,7 @@ export default function OrganizationFormPage() {
                 </Button>
                 <Button type="submit" disabled={submitting}>
                   {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {submitting ? "Adding..." : "Add Item"}
+                  {submitting ? "Adding..." : "Add Resource"}
                 </Button>
               </div>
             </form>
@@ -252,13 +252,13 @@ export default function OrganizationFormPage() {
         <Card className="w-full">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-center max-w-md">
-              <h3 className="text-lg font-semibold mb-2">No items yet</h3>
+              <h3 className="text-lg font-semibold mb-2">No resources yet</h3>
               <p className="text-muted-foreground mb-4">
-                Get started by adding your first organization item.
+                Get started by adding your first organization resource.
               </p>
               <Button onClick={() => setIsDialogOpen(true)} className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
-                Add First Item
+                Add First Resource
               </Button>
             </div>
           </CardContent>

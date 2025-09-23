@@ -34,9 +34,15 @@ export default async function HomePage() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Bot className="h-8 w-8 text-primary" />
+            <div className="relative w-8 h-8">
+            <img
+              src="/knowa-logo.svg"
+              alt="Knowa Logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
               <span className="text-xl font-semibold text-balance">
-                Enterprise Knowledge Copilot
+              Knowa
               </span>
             </div>
             <div className="flex items-center space-x-4">
@@ -75,13 +81,13 @@ export default async function HomePage() {
       </header>
 
       <section className="py-20 px-6">
-        <div className="container mx-auto text-center max-w-4xl">
+        <div className="container mx-auto text-center max-w-5xl text-7xl">
           {user ? (
             <>
               <Badge variant="secondary" className="mb-6">
                 Welcome back!
               </Badge>
-              <h1 className="text-5xl font-bold mb-6 text-balance">
+              <h1 className="font-bold mb-6 text-balance">
                 Ready to continue building your
                 <span className="text-primary"> knowledge base?</span>
               </h1>
@@ -145,7 +151,7 @@ export default async function HomePage() {
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4 text-balance">
-              Everything you need for enterprise knowledge
+              Your company's knowledge, anytime you work
             </h2>
             <p className="text-lg text-muted-foreground text-pretty max-w-2xl mx-auto">
               Built for Slack admins who want to provide instant, accurate
@@ -168,10 +174,9 @@ export default async function HomePage() {
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardHeader>
                 <FileText className="h-12 w-12 text-primary mb-4" />
-                <CardTitle>Document Management</CardTitle>
+                <CardTitle>We got Supermemory</CardTitle>
                 <CardDescription>
-                  Upload PDFs, docs, and text files. Automatic processing and
-                  indexing for instant retrieval.
+                  Fast, accurate, and secure.
                 </CardDescription>
               </CardHeader>
             </Card>
