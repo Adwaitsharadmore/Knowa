@@ -1,7 +1,8 @@
 # KNOWA
 **Your team’s knowledge, anytime you work.**
 
-![KNOWA Architecture]<img width="3240" height="3240" alt="Knowa UML" src="https://github.com/user-attachments/assets/33b7e1a8-5b76-4a1f-b5c7-14f83c074d5e" />
+## Architecture
+<img width="3240" height="3240" alt="Knowa UML" src="https://github.com/user-attachments/assets/33b7e1a8-5b76-4a1f-b5c7-14f83c074d5e" />
 
 
 ---
