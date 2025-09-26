@@ -31,7 +31,6 @@ Knowa is a Slack-first knowledge assistant that turns your organization’s onbo
 6. **Retrieve relevant chunks:** Knowa queries the **memory graph** to fetch the most relevant chunks (scoped by org and permissions).
 7. **Answer with context:** Knowa composes a response from the retrieved chunks and replies in Slack (with citations/back-links when available).
 
-> The image above (“Knowa UML.png”) illustrates this end-to-end flow. If your repo uses a different path, update the image link accordingly.
 
 ---
 
